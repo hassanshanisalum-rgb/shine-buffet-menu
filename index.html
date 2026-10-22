@@ -746,6 +746,18 @@
                 message += `   ${item.qty} x ${formatTZS(item.price)} = ${formatTZS(item.price * item.qty)}\n`;
             });
 
+           const now = new Date();
+const orderTime = now.toLocaleString('en-GB', {
+    timeZone: 'Africa/Dar_es_Salaam',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+});
+  message += `*ORDER TIME:* ${orderTime}\n`;         
             message += `-----------------------------------\n`;
             message += `*TOTAL AMOUNT:* ${formatTZS(totalPrice)}\n`;
             if (notes) {
