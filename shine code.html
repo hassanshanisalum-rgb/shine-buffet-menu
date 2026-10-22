@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shine Buffet & Grills - Interactive Menu & Order Tray</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            400: '#E6CA65',
+                            500: '#D4AF37',
+                            600: '#AA8828',
+                        },
+                        darkslate: '#12191d',
+                        charcoal: '#1e282f',
+                        burgundy: '#8B0000',
+                        borderdark: '#2d3a43'
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #12191d;
+        }
+        /* Custom dot connectors for menu prices */
+        .dots-connector {
+            background-image: radial-gradient(circle, #3a4b56 1.5px, transparent 1.5px);
+            background-size: 10px 10px;
+            background-repeat: repeat-x;
+            background-position: bottom;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #12191d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d3a43;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D4AF37;
+        }
+        /* Hide scrollbar for category scroll */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-darkslate text-gray-200 font-sans antialiased min-h-screen flex flex-col relative pb-20">
+
+    <!-- Sticky Top Navigation Header -->
+    <header class="sticky top-0 z-30 bg-darkslate/95 backdrop-blur-md border-b border-borderdark shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                
+                <!-- Brand Title & Location & Contact -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-gold-600 via-gold-500 to-amber-200 p-0.5 flex items-center justify-center shadow-lg shadow-gold-500/20">
+                            <div class="w-full h-full bg-darkslate rounded-full flex items-center justify-center">
+                                <i class="fa-solid font-bold text-gold-500 text-lg fa-utensils"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h1 class="text-xl sm:text-2xl font-bold font-serif text-white tracking-wide flex items-center gap-2">
+                                SHINE <span class="text-gold-500 font-sans text-xs tracking-widest px-2 py-0.5 border border-gold-500/30 rounded bg-burgundy/40">BUFFET & GRILLS</span>
+                            </h1>
+                            <p class="text-xs text-gray-400 flex items-center gap-2 mt-0.5">
+                                <span><i class="fa-solid fa-location-dot text-gold-500"></i> Mwai Kibaki Road, Dar Es Salaam</span>
+                                <span class="hidden sm:inline">•</span>
+                                <a href="tel:0712380395" class="hidden sm:inline hover:text-gold-500 text-gold-400"><i class="fa-solid fa-phone"></i> 0712380395</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Cart Trigger on Mobile Header -->
+                    <button onclick="toggleCartDrawer()" class="md:hidden relative p-2.5 bg-charcoal border border-borderdark rounded-xl text-gold-500 hover:border-gold-500/50">
+                        <i class="fa-solid fa-cart-shopping text-lg"></i>
+                        <span id="cartBadgeMobile" class="absolute -top-1.5 -right-1.5 bg-burgundy text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border border-gold-500">0</span>
+                    </button>
+                </div>
+
+                <!-- Search Input & Desktop Header Cart -->
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="relative flex-1 md:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="searchInput" placeholder="Search menu (Tikka, Pizza, Juice)..." 
+                            class="w-full pl-10 pr-4 py-2 bg-charcoal border border-borderdark rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gold-500 transition-colors">
+                    </div>
+                    
+                    <button onclick="toggleCartDrawer()" class="hidden md:flex items-center gap-2 px-4 py-2 bg-charcoal border border-borderdark hover:border-gold-500 rounded-xl text-gold-500 hover:text-gold-400 transition-all font-semibold text-sm">
+                        <i class="fa-solid fa-basket-shopping text-base"></i>
+                        <span>Order Tray</span>
+                        <span id="cartBadgeHeader" class="bg-burgundy text-white text-xs font-bold px-2 py-0.5 rounded-full border border-gold-500/40">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Horizontal Scroll Category Chips (24 Categories) -->
+            <div class="mt-3 pt-2 border-t border-borderdark/60 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1" id="categoryChips">
+                <!-- Chips rendered dynamically -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Menu Grid -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1">
+        <div id="noResults" class="hidden text-center py-16 text-gray-400 space-y-3">
+            <i class="fa-solid fa-utensils text-4xl text-gray-600"></i>
+            <p class="text-lg">No menu items found matching your search query.</p>
+            <button onclick="resetSearch()" class="px-4 py-2 bg-gold-500 text-darkslate font-semibold rounded-lg text-sm hover:bg-gold-400">Clear Search Filter</button>
+        </div>
+
+        <!-- Menu Container Rendered Dynamically -->
+        <div id="menuContainer" class="space-y-10"></div>
+    </main>
+
+    <!-- Floating Cart Bar at Bottom -->
+    <div id="floatingCartBar" class="fixed bottom-4 left-4 right-4 max-w-xl mx-auto bg-charcoal border border-gold-500/50 rounded-2xl shadow-2xl p-3.5 z-30 flex items-center justify-between backdrop-blur-lg transform transition-all duration-300 translate-y-28 opacity-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-burgundy flex items-center justify-center text-gold-500 text-lg border border-gold-500/30">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400"><span id="floatingCartCount" class="font-bold text-white">0</span> items selected</p>
+                <p class="text-sm font-bold text-gold-500 font-mono" id="floatingCartTotal">TZS 0</p>
+            </div>
+        </div>
+        <button onclick="openCartDrawer()" class="px-5 py-2.5 bg-gradient-to-r from-gold-600 to-gold-500 hover:from-gold-500 hover:to-gold-400 text-darkslate font-bold text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center gap-2">
+            <span>View Tray</span>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <!-- Order Tray / Cart Drawer Backdrop -->
+    <div id="cartBackdrop" onclick="closeCartDrawer()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden transition-opacity"></div>
+
+    <!-- Slide-out Order Tray Drawer -->
+    <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-charcoal border-l border-borderdark z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
+        <!-- Drawer Header -->
+        <div class="p-4 sm:p-5 border-b border-borderdark flex items-center justify-between bg-darkslate">
+            <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-receipt text-gold-500 text-xl"></i>
+                <h2 class="text-lg font-serif font-bold text-white">Your Order Tray</h2>
+            </div>
+            <button onclick="closeCartDrawer()" class="w-8 h-8 rounded-lg bg-charcoal text-gray-400 hover:text-white flex items-center justify-center border border-borderdark">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Drawer Body (Items List) -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4" id="cartItemsContainer">
+            <!-- Empty Cart State -->
+            <div id="emptyCartState" class="text-center py-16 space-y-3">
+                <i class="fa-solid fa-basket-shopping text-5xl text-gray-600"></i>
+                <p class="text-base text-gray-400">Your order tray is currently empty.</p>
+                <p class="text-xs text-gray-500">Tap the (+) button on any dish to add items to your tray.</p>
+            </div>
+        </div>
+
+        <!-- Drawer Footer (Subtotal, Order Details & WhatsApp CTA) -->
+        <div class="p-4 sm:p-5 border-t border-borderdark bg-darkslate space-y-4">
+            <!-- Details / Table / Notes Input -->
+            <div class="space-y-2">
+                <label class="block text-xs font-semibold text-gray-300">Delivery Address / Table No. / Special Request:</label>
+                <textarea id="orderNotes" rows="2" placeholder="e.g. Table #4 or Delivery to Mwai Kibaki Rd, extra spicy..." 
+                    class="w-full px-3 py-2 bg-charcoal border border-borderdark rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gold-500 transition-colors"></textarea>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="space-y-1.5 pt-2 border-t border-borderdark/50 text-xs text-gray-300">
+                <div class="flex justify-between">
+                    <span>Subtotal</span>
+                    <span id="cartSubtotal" class="font-mono text-white">TZS 0</span>
+                </div>
+                <div class="flex justify-between font-bold text-sm text-white pt-1">
+                    <span class="text-gold-500">Total Order Amount</span>
+                    <span id="cartTotal" class="font-mono text-gold-500">TZS 0</span>
+                </div>
+            </div>
+
+            <!-- Send via WhatsApp CTA -->
+            <button onclick="sendOrderViaWhatsApp()" id="whatsappBtn" disabled class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30">
+                <i class="fa-brands fa-whatsapp text-lg"></i>
+                <span>Send Order via WhatsApp</span>
+            </button>
+            <p class="text-[11px] text-center text-gray-500">
+                Direct WhatsApp Order line: <a href="https://wa.me/255675921219" target="_blank" class="text-gold-500 hover:underline">0675921219</a>
+            </p>
+        </div>
+    </aside>
+
+    <!-- Footer -->
+    <footer class="bg-charcoal border-t border-borderdark mt-12 py-8 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 space-y-3">
+            <p class="font-serif text-sm text-gold-500">Shine Buffet & Grills • Mwai Kibaki Road, Dar Es Salaam</p>
+            <p class="text-gray-400"><i class="fa-solid fa-phone text-gold-500 mr-1"></i> Call: <a href="tel:0712380395" class="hover:text-gold-500 underline font-semibold">0712380395</a> | WhatsApp Orders: <a href="https://wa.me/255675921219" target="_blank" class="hover:text-emerald-400 text-emerald-500 underline font-semibold">0675921219</a></p>
+            <p>All prices listed are in Tanzanian Shillings (TZS).</p>
+            <p class="text-gray-600">© 2026 Shine Buffet & Grills. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Application JavaScript Logic -->
+    <script>
+        // Target WhatsApp Number: 0675921219 -> Country Code +255
+        const WHATSAPP_NUMBER = "255675921219";
+
+        // Categories List (24 exact requested categories)
+        const categoriesList = [
+            "ALL", "BURGER", "CHINESE", "COOLS", "FRESH JUICE", "INDIAN DISHES", 
+            "MILK SHAKE", "OMELETS", "OTHER", "OUR FOOD SAVED WITH", "OUR SPECIAL", 
+            "PASTA", "PIZZA", "RICE", "SALAD", "SANDWICH", "SEA FOOD", "SIZZLE", 
+            "SMOOTH JUICE", "SOUPS", "STATERS", "STEAK", "SWAHILI", "TEA", "WRAP"
+        ];
+
+        // Complete Menu Database mapped with exact prices and Unsplash visual thumbnails
+        const menuData = [
+            {
+                category: "BURGER",
+                image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "b1", name: "Chicken Burger", price: 12000, desc: "Juicy chicken patty topped with fresh lettuce & spicy mayonnaise." },
+                    { id: "b2", name: "Beef Burger", price: 12000, desc: "Classic beef patty with fresh tomato, lettuce, and house sauce." }
+                ]
+            },
+            {
+                category: "CHINESE",
+                image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "c1", name: "Noodles Chicken", price: 12000, desc: "Stir-fried oriental noodles tossed with seasoned chicken." },
+                    { id: "c2", name: "Vegetable Noodles", price: 12000, desc: "Wok noodles stir-fried with crisp garden vegetables." },
+                    { id: "c3", name: "Chicken Fried Rice", price: 12000, desc: "Fragrant rice wok-fried with chicken and scallions." },
+                    { id: "c4", name: "Combination Rice", price: 15000, desc: "Wok fried rice loaded with chicken, beef, and egg." },
+                    { id: "c5", name: "Chicken Shezwan", price: 15000, desc: "Spicy Schezwan sauce tossed chicken with peppers." },
+                    { id: "c6", name: "Makange", price: 15000, desc: "Signature Tanzanian wet-fried spiced chicken/beef style." },
+                    { id: "c7", name: "Chinese Wings", price: 15000, desc: "Crispy chicken wings tossed in soy garlic glaze." }
+                ]
+            },
+            {
+                category: "COOLS",
+                image: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "co1", name: "Soda Soft Drink (350ml)", price: 2500, desc: "Cold Coca-Cola, Fanta, Sprite, or Stoney." },
+                    { id: "co2", name: "Mineral Water (500ml)", price: 1500, desc: "Chilled purified mineral water." },
+                    { id: "co3", name: "Red Bull Energy Drink", price: 6000, desc: "Chilled energy drink." }
+                ]
+            },
+            {
+                category: "FRESH JUICE",
+                image: "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "fj1", name: "Mango Juice", price: 5000, desc: "100% natural freshly blended ripe mango." },
+                    { id: "fj2", name: "Orange Juice", price: 5000, desc: "Freshly squeezed sweet oranges." },
+                    { id: "fj3", name: "Passion Juice", price: 5000, desc: "Aromatic tropical passion fruit juice." },
+                    { id: "fj4", name: "Pineapple Juice", price: 5000, desc: "Freshly pressed sweet pineapple." },
+                    { id: "fj5", name: "Avocado Juice", price: 10000, desc: "Creamy avocado blend with a touch of honey." },
+                    { id: "fj6", name: "Mint Lemon Juice", price: 10000, desc: "Refreshing zesty lemon juice with fresh crushed mint." }
+                ]
+            },
+            {
+                category: "INDIAN DISHES",
+                image: "https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "id1", name: "Chicken Curry", price: 20000, desc: "Tender chicken cooked in traditional spiced curry gravy." },
+                    { id: "id2", name: "Beef Curry", price: 20000, desc: "Succulent beef chunks simmered in aromatic gravy." },
+                    { id: "id3", name: "Mutton Curry", price: 20000, desc: "Slow cooked tender mutton with rich authentic spices." },
+                    { id: "id4", name: "Butter Chicken", price: 20000, desc: "Boneless chicken in a rich tomato, butter & cream sauce." },
+                    { id: "id5", name: "Chicken Tikka Masala", price: 20000, desc: "Grilled tikka pieces in a thick spicy onion gravy." },
+                    { id: "id6", name: "Dal Fry", price: 15000, desc: "Yellow lentils tempered with garlic, cumin, and ghee." }
+                ]
+            },
+            {
+                category: "MILK SHAKE",
+                image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "ms1", name: "Vanilla Milkshake", price: 10000, desc: "Creamy vanilla ice cream shake." },
+                    { id: "ms2", name: "Chocolate Milkshake", price: 10000, desc: "Rich dark chocolate ice cream shake." },
+                    { id: "ms3", name: "Strawberry Milkshake", price: 10000, desc: "Classic strawberry ice cream shake." }
+                ]
+            },
+            {
+                category: "OMELETS",
+                image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "om1", name: "Spanish Omelet", price: 8000, desc: "Three-egg omelet with bell peppers, onions, and potatoes." },
+                    { id: "om2", name: "Cheese Omelet", price: 10000, desc: "Fluffy omelet stuffed with melted cheddar cheese." }
+                ]
+            },
+            {
+                category: "OTHER",
+                image: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "ot1", name: "Chips Plain / Garlic / Shezwan", price: 4000, desc: "Golden fries available plain, garlic butter, or spicy Shezwan." },
+                    { id: "ot2", name: "Chips Yai", price: 7000, desc: "Famous Tanzanian French fries omelet." }
+                ]
+            },
+            {
+                category: "OUR FOOD SAVED WITH",
+                image: "https://images.unsplash.com/photo-1541518763669-27fef04b14e8?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "sw1", name: "Ugali Muhogo / Dona / Sembe / Mtama", price: 4000, desc: "Traditional stiff corn/cassava/millet porridge portion." }
+                ]
+            },
+            {
+                category: "OUR SPECIAL",
+                image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "sp1", name: "Kisufuria (Beef, Chicken) Watu Nne", price: 50000, desc: "Grand signature feast pot for 4 people with meats, fries & rice." },
+                    { id: "sp2", name: "Kisufuria Watu Wawili", price: 25000, desc: "Signature feast pot for 2 people with grilled meats and sides." },
+                    { id: "sp3", name: "Kisinia Kuanzia", price: 70000, desc: "Large traditional platter featuring assorted meats and sides." }
+                ]
+            },
+            {
+                category: "PASTA",
+                image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "pa1", name: "Spaghetti Bolognese", price: 16000, desc: "Pasta tossed in rich minced beef tomato herb sauce." },
+                    { id: "pa2", name: "Penne Carbonara", price: 18000, desc: "Penne in creamy parmesan and bacon sauce." }
+                ]
+            },
+            {
+                category: "PIZZA",
+                image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "pz1", name: "Magarita Pizza", price: 15000, desc: "Classic mozzarella cheese and fresh tomato sauce." },
+                    { id: "pz2", name: "BBQ Pizza", price: 18000, desc: "Grilled chicken, sweetcorn, BBQ sauce, and cheese." },
+                    { id: "pz3", name: "Sausage Pizza", price: 18000, desc: "Sliced savoury sausages and melted mozzarella." },
+                    { id: "pz4", name: "Seafood Pizza", price: 22000, desc: "Prawns, calamari, garlic oil, and cheese." },
+                    { id: "pz5", name: "Mixed Pizza", price: 25000, desc: "Beef, chicken, pepperoni, mushrooms, and veggies." }
+                ]
+            },
+            {
+                category: "RICE",
+                image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "rc1", name: "Plain Rice", price: 4000, desc: "Steamed long-grain white rice." },
+                    { id: "rc2", name: "Pilau Special", price: 15000, desc: "Traditional aromatic Swahili spiced rice." }
+                ]
+            },
+            {
+                category: "SALAD",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "sl1", name: "Kachumbari Salad", price: 4000, desc: "Chopped tomatoes, onions, chillies, and lime." },
+                    { id: "sl2", name: "Greek Salad", price: 12000, desc: "Cucumbers, olives, feta cheese, and olive oil." }
+                ]
+            },
+            {
+                category: "SANDWICH",
+                image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "sd1", name: "Club Sandwich", price: 16000, desc: "Triple decker toast with chicken, egg, and cheese." },
+                    { id: "sd2", name: "Cheese Sandwich", price: 10000, desc: "Toasted white bread filled with cheddar." }
+                ]
+            },
+            {
+                category: "SEA FOOD",
+                image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "sf1", name: "Ngisi (Calamari)", price: 25000, desc: "Grilled or fried tender ocean calamari." },
+                    { id: "sf2", name: "Pweza (Octopus)", price: 25000, desc: "Swahili spiced octopus simmered or grilled." },
+                    { id: "sf3", name: "Changu Fish", price: 17000, desc: "Fresh local Changu fish cooked to order." },
+                    { id: "sf4", name: "King Fish", price: 20000, desc: "Charcoal grilled King Fish steak." },
+                    { id: "sf5", name: "Prawns", price: 22000, desc: "Garlic butter sautéed ocean prawns." },
+                    { id: "sf6", name: "Fish Fillet", price: 25000, desc: "Pan-seared white fish fillet with lemon sauce." },
+                    { id: "sf7", name: "Sea Food Plate", price: 150000, desc: "Grand platter with whole fish, prawns, calamari & octopus." }
+                ]
+            },
+            {
+                category: "SIZZLE",
+                image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "sz1", name: "Beef Sizzle", price: 22000, desc: "Sizzling beef tenderloin served on a hot iron plate." },
+                    { id: "sz2", name: "Chicken Sizzle", price: 22000, desc: "Sizzling marinated chicken breast with veggies." },
+                    { id: "sz3", name: "Prawn Sizzle", price: 25000, desc: "Piping hot prawns served on sizzler plate." }
+                ]
+            },
+            {
+                category: "SMOOTH JUICE",
+                image: "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "sm1", name: "Banana Strawberry Smoothie", price: 9000, desc: "Smooth blend of bananas and strawberries." },
+                    { id: "sm2", name: "Tropical Smoothie", price: 9000, desc: "Mango, pineapple, and yogurt blend." }
+                ]
+            },
+            {
+                category: "SOUPS",
+                image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "sp1_soup", name: "Chicken Soup", price: 12000, desc: "Comforting clear chicken broth with herbs." },
+                    { id: "sp2_soup", name: "Mushroom Soup", price: 12000, desc: "Creamy wild mushroom soup." }
+                ]
+            },
+            {
+                category: "STATERS",
+                image: "https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "st1", name: "Garlic Bread", price: 8000, desc: "Toasted baguette with garlic butter." },
+                    { id: "st2", name: "Garlic Bread with Cheese", price: 10000, desc: "Toasted garlic baguette topped with melted mozzarella." }
+                ]
+            },
+            {
+                category: "STEAK",
+                image: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "stk1", name: "Mushroom Steak", price: 22000, desc: "Prime beef steak topped with creamy mushroom sauce." },
+                    { id: "stk2", name: "Pepper Steak", price: 22000, desc: "Char-grilled beef steak coated in crushed peppercorn sauce." }
+                ]
+            },
+            {
+                category: "SWAHILI",
+                image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "swh1", name: "Maharage ya Nazi", price: 4000, desc: "Traditional beans cooked in creamy coconut sauce." },
+                    { id: "swh2", name: "Nyama Rosti", price: 10000, desc: "Tender beef stew cooked with Swahili spices." },
+                    { id: "swh3", name: "Pilau Mbuzi", price: 15000, desc: "Fragrant goat meat pilau rice." },
+                    { id: "swh4", name: "Pilau Kuku", price: 15000, desc: "Spiced rice cooked with local chicken." },
+                    { id: "swh5", name: "Pilau Ng'ombe", price: 15000, desc: "Traditional beef pilau rice." },
+                    { id: "swh6", name: "Maini Rosti", price: 10000, desc: "Spiced pan-fried beef liver." },
+                    { id: "swh7", name: "Ndizi Nyama", price: 12000, desc: "Green plantains stewed with beef." },
+                    { id: "swh8", name: "Nyama Choma", price: 20000, desc: "Flame grilled beef choma portion." },
+                    { id: "swh9", name: "Mbuzi Choma", price: 17000, desc: "Charcoal grilled local goat meat." },
+                    { id: "swh10", name: "Sekela Chicken", price: 12000, desc: "Dar-es-salaam style pressed grilled chicken." }
+                ]
+            },
+            {
+                category: "TEA",
+                image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "t1", name: "African Tea (Tangawizi)", price: 4000, desc: "Black tea brewed with fresh ginger and milk." },
+                    { id: "t2", name: "Black Coffee", price: 5000, desc: "Fresh brewed Tanzanian Arabica coffee." }
+                ]
+            },
+            {
+                category: "WRAP",
+                image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=800&q=80",
+                items: [
+                    { id: "wr1", name: "Chicken Wrap", price: 14000, desc: "Grilled chicken, fresh salad & sauce wrapped in tortilla." },
+                    { id: "wr2", name: "Beef Wrap", price: 14000, desc: "Seasoned beef strips and veggies wrapped in tortilla." }
+                ]
+            }
+        ];
+
+        // State Management
+        let activeCategory = "ALL";
+        let searchQuery = "";
+        let cart = []; // Array of { id, name, price, qty }
+
+        // Currency Formatter
+        function formatTZS(amount) {
+            return 'TZS ' + amount.toLocaleString('en-US');
+        }
+
+        // Render Horizontal Scroll Category Chips
+        function renderCategoryChips() {
+            const container = document.getElementById('categoryChips');
+            container.innerHTML = categoriesList.map(cat => {
+                const isActive = activeCategory === cat;
+                return `
+                    <button onclick="setCategory('${cat}')" 
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+                            isActive 
+                            ? 'bg-burgundy text-gold-500 border-gold-500 shadow-md shadow-burgundy/50' 
+                            : 'bg-charcoal text-gray-300 border-borderdark hover:border-gold-500/50 hover:text-white'
+                        }">
+                        ${cat}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Render Menu Container
+        function renderMenu() {
+            const container = document.getElementById('menuContainer');
+            const noResults = document.getElementById('noResults');
+            container.innerHTML = "";
+
+            let totalVisibleItems = 0;
+
+            menuData.forEach(catGroup => {
+                // Category Filter
+                if (activeCategory !== "ALL" && activeCategory !== catGroup.category) {
+                    return;
+                }
+
+                // Search Filter inside category items
+                const filteredItems = catGroup.items.filter(item => {
+                    const q = searchQuery.toLowerCase();
+                    return item.name.toLowerCase().includes(q) || 
+                           item.desc.toLowerCase().includes(q) ||
+                           catGroup.category.toLowerCase().includes(q);
+                });
+
+                if (filteredItems.length === 0) return;
+                totalVisibleItems += filteredItems.length;
+
+                // Category Container Section
+                const section = document.createElement('div');
+                section.className = "bg-charcoal rounded-2xl border border-borderdark overflow-hidden shadow-2xl";
+
+                section.innerHTML = `
+                    <!-- Category Header with Thumbnail Banner & Badge -->
+                    <div class="relative h-44 sm:h-52 w-full overflow-hidden">
+                        <img src="${catGroup.image}" alt="${catGroup.category}" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/60 to-transparent"></div>
+                        <div class="absolute bottom-4 left-4 right-4 sm:left-6 sm:right-6 flex items-end justify-between">
+                            <div>
+                                <span class="inline-block px-2.5 py-0.5 bg-burgundy text-gold-400 border border-gold-500/30 text-[10px] font-bold rounded uppercase tracking-wider mb-1">
+                                    Category
+                                </span>
+                                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white tracking-wide">${catGroup.category}</h2>
+                            </div>
+                            <span class="text-xs text-gray-400 font-mono">${filteredItems.length} items</span>
+                        </div>
+                    </div>
+
+                    <!-- Items Grid -->
+                    <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        ${filteredItems.map(item => {
+                            const cartItem = cart.find(i => i.id === item.id);
+                            const itemQty = cartItem ? cartItem.qty : 0;
+                            return `
+                                <div class="bg-darkslate/70 p-4 rounded-xl border border-borderdark hover:border-gold-500/40 transition-all flex flex-col justify-between group">
+                                    <div>
+                                        <div class="flex items-start justify-between gap-2">
+                                            <h3 class="text-base font-semibold text-white group-hover:text-gold-400 transition-colors">
+                                                ${item.name}
+                                            </h3>
+                                            <span class="text-sm font-bold font-mono text-gold-500 whitespace-nowrap bg-charcoal px-2.5 py-1 rounded-lg border border-borderdark">
+                                                ${formatTZS(item.price)}
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">${item.desc}</p>
+                                    </div>
+
+                                    <!-- Action Button / Quantity Selector -->
+                                    <div class="mt-4 pt-3 border-t border-borderdark/50 flex items-center justify-between">
+                                        <span class="text-[11px] text-gray-500 font-mono">ID: ${item.id}</span>
+                                        
+                                        ${itemQty > 0 ? `
+                                            <div class="flex items-center gap-2 bg-charcoal border border-gold-500/50 rounded-xl p-1">
+                                                <button onclick="updateQty('${item.id}', -1)" class="w-7 h-7 rounded-lg bg-burgundy text-white hover:bg-red-700 flex items-center justify-center font-bold text-xs">
+                                                    <i class="fa-solid fa-minus"></i>
+                                                </button>
+                                                <span class="w-6 text-center text-xs font-bold text-white font-mono">${itemQty}</span>
+                                                <button onclick="updateQty('${item.id}', 1)" class="w-7 h-7 rounded-lg bg-gold-500 text-darkslate hover:bg-gold-400 flex items-center justify-center font-bold text-xs">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        ` : `
+                                            <button onclick="addToCart('${item.id}', '${escapeQuotes(item.name)}', ${item.price})" 
+                                                class="px-3.5 py-1.5 bg-burgundy hover:bg-red-800 text-gold-400 border border-gold-500/40 font-semibold text-xs rounded-xl transition-all flex items-center gap-1.5 shadow-md">
+                                                <i class="fa-solid fa-plus text-[10px]"></i>
+                                                <span>Add to Order</span>
+                                            </button>
+                                        `}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+
+                container.appendChild(section);
+            });
+
+            if (totalVisibleItems === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        }
+
+        // Helper to escape single quotes in strings
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'");
+        }
+
+        // Set Active Category
+        function setCategory(category) {
+            activeCategory = category;
+            renderCategoryChips();
+            renderMenu();
+        }
+
+        // Search Input Listener
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuery = e.target.value.trim();
+            renderMenu();
+        });
+
+        // Reset Search
+        function resetSearch() {
+            searchQuery = "";
+            activeCategory = "ALL";
+            document.getElementById('searchInput').value = "";
+            renderCategoryChips();
+            renderMenu();
+        }
+
+        // CART LOGIC
+        function addToCart(id, name, price) {
+            const existing = cart.find(i => i.id === id);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ id, name, price, qty: 1 });
+            }
+            updateCartUI();
+            renderMenu();
+        }
+
+        function updateQty(id, delta) {
+            const index = cart.findIndex(i => i.id === id);
+            if (index !== -1) {
+                cart[index].qty += delta;
+                if (cart[index].qty <= 0) {
+                    cart.splice(index, 1);
+                }
+            }
+            updateCartUI();
+            renderMenu();
+        }
+
+        function updateCartUI() {
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            // Update Badges
+            document.getElementById('cartBadgeMobile').innerText = totalCount;
+            document.getElementById('cartBadgeHeader').innerText = totalCount;
+            document.getElementById('floatingCartCount').innerText = totalCount;
+            document.getElementById('floatingCartTotal').innerText = formatTZS(totalPrice);
+            
+            document.getElementById('cartSubtotal').innerText = formatTZS(totalPrice);
+            document.getElementById('cartTotal').innerText = formatTZS(totalPrice);
+
+            // Floating Bar Visiblity
+            const floatingBar = document.getElementById('floatingCartBar');
+            if (totalCount > 0) {
+                floatingBar.classList.remove('translate-y-28', 'opacity-0');
+                floatingBar.classList.add('translate-y-0', 'opacity-100');
+                document.getElementById('whatsappBtn').disabled = false;
+            } else {
+                floatingBar.classList.add('translate-y-28', 'opacity-0');
+                floatingBar.classList.remove('translate-y-0', 'opacity-100');
+                document.getElementById('whatsappBtn').disabled = true;
+            }
+
+            // Render Cart Drawer Items
+            renderCartDrawerItems();
+        }
+
+        function renderCartDrawerItems() {
+            const container = document.getElementById('cartItemsContainer');
+            const emptyState = document.getElementById('emptyCartState');
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div id="emptyCartState" class="text-center py-16 space-y-3">
+                        <i class="fa-solid fa-basket-shopping text-5xl text-gray-600"></i>
+                        <p class="text-base text-gray-400">Your order tray is currently empty.</p>
+                        <p class="text-xs text-gray-500">Tap the (+ Add to Order) button on any dish to select items.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
+                <div class="bg-darkslate p-3.5 rounded-xl border border-borderdark flex items-center justify-between gap-3">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-semibold text-white truncate">${item.name}</h4>
+                        <p class="text-xs text-gold-500 font-mono mt-0.5">${formatTZS(item.price)} x ${item.qty} = ${formatTZS(item.price * item.qty)}</p>
+                    </div>
+
+                    <div class="flex items-center gap-2 bg-charcoal border border-borderdark rounded-lg p-1">
+                        <button onclick="updateQty('${item.id}', -1)" class="w-6 h-6 rounded bg-burgundy text-white hover:bg-red-700 flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                        <span class="w-5 text-center text-xs font-bold text-white font-mono">${item.qty}</span>
+                        <button onclick="updateQty('${item.id}', 1)" class="w-6 h-6 rounded bg-gold-500 text-darkslate hover:bg-gold-400 flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Cart Drawer Controls
+        function openCartDrawer() {
+            document.getElementById('cartDrawer').classList.remove('translate-x-full');
+            document.getElementById('cartBackdrop').classList.remove('hidden');
+        }
+
+        function closeCartDrawer() {
+            document.getElementById('cartDrawer').classList.add('translate-x-full');
+            document.getElementById('cartBackdrop').classList.add('hidden');
+        }
+
+        function toggleCartDrawer() {
+            const drawer = document.getElementById('cartDrawer');
+            if (drawer.classList.contains('translate-x-full')) {
+                openCartDrawer();
+            } else {
+                closeCartDrawer();
+            }
+        }
+
+        // Send Order via WhatsApp Function
+        function sendOrderViaWhatsApp() {
+            if (cart.length === 0) return;
+
+            const notes = document.getElementById('orderNotes').value.trim();
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            let message = `*NEW ORDER - SHINE BUFFET & GRILLS*\n`;
+            message += `-----------------------------------\n`;
+            
+            cart.forEach((item, index) => {
+                message += `${index + 1}. *${item.name}*\n`;
+                message += `   ${item.qty} x ${formatTZS(item.price)} = ${formatTZS(item.price * item.qty)}\n`;
+            });
+
+            message += `-----------------------------------\n`;
+            message += `*TOTAL AMOUNT:* ${formatTZS(totalPrice)}\n`;
+            if (notes) {
+                message += `*DETAILS / NOTES:* ${notes}\n`;
+            } else {
+                message += `*DETAILS:* Takeaway / Dine-in\n`;
+            }
+            message += `-----------------------------------\n`;
+            message += `_Sent via Shine Buffet & Grills Web Menu_`;
+
+            // WhatsApp Web/App URL construct
+            const encodedText = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+
+            // Open in new window/tab
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Initialize Application
+        window.onload = function() {
+            renderCategoryChips();
+            renderMenu();
+        };
+    </script>
+</body>
+</html>
